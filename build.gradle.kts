@@ -3,6 +3,9 @@ plugins {
     id ("application")
 }
 
+group = "com.grafana"
+
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -10,6 +13,7 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+
 
 application {
     mainClass = "dev.marko.App"
@@ -27,6 +31,7 @@ repositories {
 dependencies {
     implementation("com.grafana:grafana-foundation-sdk:11.4.0-1746458685")
 
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -35,3 +40,4 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+

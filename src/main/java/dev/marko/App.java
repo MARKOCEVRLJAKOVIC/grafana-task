@@ -6,12 +6,14 @@ import com.grafana.foundation.dashboard.*;
 import com.grafana.foundation.logs.PanelBuilder;
 import com.grafana.foundation.loki.DataqueryBuilder;
 
+import java.lang.annotation.Target;
 import java.util.List;
 
 public class App {
+
+    private static final String prometheusName = "Prometheus";
+
     public static void main(String[] args) {
-
-
 
     Dashboard dashboard = new DashboardBuilder("Sample Dashboard")
             .uid("generated-from-java").tags(List.of("generated", "from", "java")).

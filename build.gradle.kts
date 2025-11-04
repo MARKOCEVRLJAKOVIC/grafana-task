@@ -1,12 +1,20 @@
 plugins {
     id("java")
+    id ("application")
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    withJavadocJar()
+    withSourcesJar()
 }
+
+application {
+    mainClass = "dev.marko.App"
+}
+
 
 group = "dev.marko"
 version = "1.0-SNAPSHOT"

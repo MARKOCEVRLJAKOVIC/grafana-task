@@ -1,4 +1,4 @@
-# CPU Usage Dashboard — Grafana Observability-as-Code
+# CPU Usage Dashboard Grafana
 
 This project demonstrates generating a Grafana dashboard programmatically 
 using the Grafana Foundation SDK in Java. It visualizes the `cpu_usage` metric

@@ -1,0 +1,51 @@
+datasource:
+  uid: Prometheus
+  name: Prometheus
+
+dashboard:
+  title: "Demo - cpu_usage"
+  uid: "cpu-usage-demo"
+  refresh: "5s"
+  time_from: "now-5m"
+  time_to: "now"
+  tags: ["demo", "cpu_usage"]
+
+panels:
+  - title: "CPU usage — timeseries (avg_over_time 5m)"
+    type: "timeseries"
+    expr: "avg_over_time(cpu_usage[5m])"
+    legend: "avg_5m {{instance}}"
+    refId: "A"
+    unit: "percent"
+    min: 0
+    max: 100
+    grid:
+      x: 0
+      y: 0
+      w: 24
+      h: 9
+
+  - title: "CPU usage — overall average (5m)"
+    type: "stat"
+    expr: "avg(avg_over_time(cpu_usage[5m]))"
+    legend: "overall avg"
+    refId: "B"
+    unit: "percent"
+    min: 0
+    max: 100
+    grid:
+      x: 0
+      y: 9
+      w: 6
+      h: 4
+
+  - title: "CPU usage — by instance (latest 5m avg)"
+    type: "table"
+    expr: "avg_over_time(cpu_usage[5m])"
+    legend: "{{instance}}"
+    refId: "C"
+    grid:
+      x: 6
+      y: 9
+      w: 18
+      h: 8

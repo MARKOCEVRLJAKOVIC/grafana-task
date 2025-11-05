@@ -30,6 +30,8 @@ repositories {
 
 dependencies {
     implementation("com.grafana:grafana-foundation-sdk:11.4.0-1746458685")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
 
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))

@@ -1,122 +1,62 @@
 package dev.marko;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.grafana.foundation.dashboard.*;
 import com.grafana.foundation.prometheus.DataqueryBuilder;
 
-import java.util.List;
-
+import java.io.InputStream;
 
 public class CpuUsageDashboard {
 
-    public static Dashboard build() {
-//        DataSourceRef prometheus = new DataSourceRef.Builder()
-//                .uid("Prometheus")
-//                .build();
+    public static Dashboard build() throws Exception {
+        DashboardConfig config = loadConfig();
 
-        DataSourceRef prometheus = new DataSourceRef("Prometheus", "prometheus");
+        DataSourceRef prometheus = new DataSourceRef(
+                config.datasource.uid,
+                config.datasource.name
+        );
 
-        Panel timeseries = new PanelBuilder()
-                .title("CPU usage — timeseries (avg_over_time 5m)")
-                .datasource(prometheus)
-                .unit("percent")
-                .min(0.0)
-                .max(100.0)
-                .gridPos(getGridPos(0, 0, 24, 9))
-                .withTarget(
-                        new DataqueryBuilder()
-                                .expr("avg_over_time(cpu_usage[5m])")
-                                .legendFormat("avg_5m {{instance}}")
-                                .refId("A")
-                )
-                .build();
-
-        Panel overallAvg = new PanelBuilder()
-                .title("CPU usage — overall average (5m)")
-                .datasource(prometheus)
-                .unit("percent")
-                .min(0.0)
-                .max(100.0)
-                .gridPos(getGridPos(0, 9, 6, 4))
-                .withTarget(
-                        new DataqueryBuilder()
-                                .expr("avg(avg_over_time(cpu_usage[5m]))")
-                                .legendFormat("overall avg")
-                                .refId("B")
-                )
-                .build();
-
-        Panel byInstanceTable = new PanelBuilder()
-                .title("CPU usage — by instance (latest 5m avg)")
-                .datasource(prometheus)
-                .gridPos(getGridPos(6, 9, 18, 8))
-                .withTarget(
-                        new DataqueryBuilder()
-                                .expr("avg_over_time(cpu_usage[5m])")
-                                .legendFormat("{{instance}}")
-                                .refId("C")
-                )
-                .build();
-
-        Dashboard dashboard = new DashboardBuilder("Dashboard")
-                .title("Demo - cpu_usage")
-                .uid("cpu-usage-demo")
-                .refresh("5s")
+        DashboardBuilder builder = new DashboardBuilder("Dashboard")
+                .title(config.dashboard.title)
+                .uid(config.dashboard.uid)
+                .refresh(config.dashboard.refresh)
                 .time(new DashboardDashboardTimeBuilder()
-                        .from("now-5m")
-                        .to("now"))
-                .withPanel(new PanelBuilder()
-                        .title("CPU usage — timeseries (avg_over_time 5m)")
-                        .datasource(prometheus)
-                        .unit("percent")
-                        .min(0.0)
-                        .max(100.0)
-                        .gridPos(new GridPos(9, 24, 0, 0, false))
-                        .withTarget(
-                                new DataqueryBuilder()
-                                        .expr("avg_over_time(cpu_usage[5m])")
-                                        .legendFormat("avg_5m {{instance}}")
-                                        .refId("A")
-                        )
-                )
-                .withPanel(new PanelBuilder()
-                        .title("CPU usage — overall average (5m)")
-                        .datasource(prometheus)
-                        .unit("percent")
-                        .min(0.0)
-                        .max(100.0)
-                        .gridPos(new GridPos(4, 6, 0, 9, false))
-                        .withTarget(
-                                new DataqueryBuilder()
-                                        .expr("avg(avg_over_time(cpu_usage[5m]))")
-                                        .legendFormat("overall avg")
-                                        .refId("B")
-                        )
-                )
-                .withPanel(new PanelBuilder()
-                        .title("CPU usage — by instance (latest 5m avg)")
-                        .datasource(prometheus)
-                        .gridPos(new GridPos(8, 18, 6, 9, false))
-                        .withTarget(
-                                new DataqueryBuilder()
-                                        .expr("avg_over_time(cpu_usage[5m])")
-                                        .legendFormat("{{instance}}")
-                                        .refId("C")
-                        )
-                )
-                .tags(List.of("demo", "cpu_usage"))
-                .build();
+                        .from(config.dashboard.time_from)
+                        .to(config.dashboard.time_to))
+                .tags(config.dashboard.tags);
 
-        return dashboard;
+        for (DashboardConfig.PanelConfig p : config.panels) {
+
+            Panel panel = new PanelBuilder()
+                    .title(p.title)
+                    .type(p.type)
+                    .datasource(prometheus)
+                    .unit(p.unit)
+                    .min(p.min)
+                    .max(p.max)
+                    .gridPos(new GridPos(p.grid.h, p.grid.w, p.grid.x, p.grid.y, false))
+                    .withTarget(new DataqueryBuilder()
+                            .expr(p.expr)
+                            .legendFormat(p.legend)
+                            .refId(p.refId))
+                    .build();
+            builder.withPanel(() -> panel);
+        }
+
+        return builder.build();
     }
 
-    private static GridPos getGridPos(int x, int y, int w, int h) {
-        return new GridPos(x, y, w, h, false);
+    private static DashboardConfig loadConfig() throws Exception {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        try (InputStream in = CpuUsageDashboard.class.getResourceAsStream("/dashboard-config.yaml")) {
+            return mapper.readValue(in, DashboardConfig.class);
+        }
     }
 
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) throws Exception {
         Dashboard dashboard = build();
         System.out.println(dashboard.toJSON());
     }
-
 }

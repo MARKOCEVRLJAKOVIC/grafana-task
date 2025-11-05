@@ -11,14 +11,14 @@ import java.io.InputStream;
 public class CpuUsageDashboard {
 
     public static Dashboard build() throws Exception {
-        DashboardConfig config = loadConfig();
+        var config = loadConfig();
 
-        DataSourceRef prometheus = new DataSourceRef(
+        var prometheus = new DataSourceRef(
                 config.datasource.uid,
                 config.datasource.name
         );
 
-        DashboardBuilder builder = new DashboardBuilder("Dashboard")
+        var builder = new DashboardBuilder("Dashboard")
                 .title(config.dashboard.title)
                 .uid(config.dashboard.uid)
                 .refresh(config.dashboard.refresh)
@@ -49,14 +49,14 @@ public class CpuUsageDashboard {
     }
 
     private static DashboardConfig loadConfig() throws Exception {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        var mapper = new ObjectMapper(new YAMLFactory());
         try (InputStream in = CpuUsageDashboard.class.getResourceAsStream("/dashboard-config.yaml")) {
             return mapper.readValue(in, DashboardConfig.class);
         }
     }
 
     public static void main(String[] args) throws Exception {
-        Dashboard dashboard = build();
+        var dashboard = build();
         System.out.println(dashboard.toJSON());
     }
 }
